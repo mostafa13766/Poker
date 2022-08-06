@@ -423,7 +423,7 @@ class Player(Dealer):
         elif money < Dealer.this_round_betsize * 2:
             print(
                 f'bet size must be at least 2 times larger than {Dealer.this_round_betsize}')
-
+#debugging lines
 table = play_ground(['mostafa', 'javad', 'ali'])
 table.preflop()
 table.flop()

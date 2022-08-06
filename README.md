@@ -1,2 +1,2 @@
 # Poker
-Stimulating the poker game
+Simulation the poker game

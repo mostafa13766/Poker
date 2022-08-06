@@ -1,33 +1,35 @@
+#!/usr/bin/env python
+
 from random import choice as randch
 import re
 
 
 class play_ground:
     list_cards = []  # list of all 52 cars made by __init__ method
-    list_cards_picked = [] # list of 5 'table cards' + 'players' cards' that picked in current round
-    cards_table = [] # list of 5 cards on the table in current round
-    dict_players_cards = {} # list of players and their 2 cards in preflop
-    player_data = {} # dictionary of players that introduce based: key='player name' : value= f'player+{num}'
-                    # activated by __init__ method
-    player_rank = {} # dictionary of players' ranking. key= 'name of player',value='ranking(ex.: flush)'
-    count = 0 # counting players in the table, activated by __init__ method
+    # list of 5 'table cards' + 'players' cards' that picked in current round
+    list_cards_picked = []
+    cards_table = []  # list of 5 cards on the table in current round
+    dict_players_cards = {}  # list of players and their 2 cards in preflop
+    player_data = {}  # dictionary of players that introduce based: key='player name' : value= f'player+{num}'
+    # activated by __init__ method
+    # dictionary of players' ranking. key= 'name of player',value='ranking(ex.: flush)'
+    player_rank = {}
+    count = 0  # counting players in the table, activated by __init__ method
 
     def __init__(self, players: list):
         self.players = players
         for player in players:
-            self.player = player # extacting every player
-            play_ground.count += 1 # counting every player
+            self.player = player  # extacting every player
+            play_ground.count += 1  # counting every player
             play_ground.player_data[self.player] = 'player' + \
-                str(play_ground.count) # adding player ro the player_data dict
-                
+                str(play_ground.count)  # adding player ro the player_data dict
+
         self.making_cards()
 
     def __repr__(self):
         return f"""This is a poker table, with {len(self.players)} players.
     players are: {self.player_data}
     """
-    
-            
 
     def making_cards(self):
         '''
@@ -46,10 +48,11 @@ class play_ground:
             for num in range(1, 14):
                 self.list_cards.append(suit+'-'+str(num))
         return self.list_cards
+
     def reset(self):
         """
         reset values for new round
-        
+
         """
         self.list_cards.clear()
         self.list_cards_picked.clear()
@@ -116,17 +119,17 @@ class play_ground:
         """
         ranking the players based on their cards and return the
         result in 'player_rank' dictionary.
-        
+
         inputs -->
         players: list, list of players
-        
+
         outputs -->
         player_rank: dict, players' ranking
         """
         for player in players:
             player_cards = []
             player_cards = self.cards_table + self.dict_players_cards[player]
-            straight_set=set()
+            straight_set = set()
             striaght_flush = ''
             suits_dict = {
                 'card-dict': {
@@ -160,7 +163,7 @@ class play_ground:
 
                     '4': 0,
 
-                    '5':0,
+                    '5': 0,
 
                     '6': 0,
 
@@ -168,15 +171,15 @@ class play_ground:
 
                     '8': 0,
 
-                    '9':0,
+                    '9': 0,
 
-                    '10':0,
+                    '10': 0,
 
-                    '11':0,
+                    '11': 0,
 
-                    '12':0,
+                    '12': 0,
 
-                    '13':0
+                    '13': 0
 
 
 
@@ -184,38 +187,36 @@ class play_ground:
 
             for card in player_cards:
                 suits_dict['card-dict'][card.split('-')[0]]['count'] += 1
-                suits_dict['card-dict'][card.split('-')[0]]['cards'].append(int(card.split('-')[1]))
+                suits_dict['card-dict'][card.split('-')[0]
+                                        ]['cards'].append(int(card.split('-')[1]))
                 suits_dict['number'][card.split('-')[1]] += 1
                 straight_set.add(int(card.split('-')[1]))
-                striaght_flush+=card[0]
-
+                striaght_flush += card[0]
 
             for cards in suits_dict['card-dict'].values():
                 cards['cards'].sort()
                 if cards['count'] >= 5:
                     cards['flush'] = True
 
-
-
             suits_dict['straight']['list'] = list(straight_set)
             suits_dict['straight']['list'].sort()
             fix_num = suits_dict['straight']['list'][0]-1
-            are_all_straight=''
+            are_all_straight = ''
             for number in suits_dict['straight']['list']:
-                if number - fix_num ==1:
-                     are_all_straight+=str(1)
+                if number - fix_num == 1:
+                    are_all_straight += str(1)
                 else:
-                    are_all_straight+=str(0)
+                    are_all_straight += str(0)
                 fix_num = number
             from re import match
-            if bool(match('1\d*[1]{5}',are_all_straight)) == True: #match 5 executive (1) 
+            # match 5 executive (1)
+            if bool(match('1\d*[1]{5}', are_all_straight)) == True:
                 suits_dict['straight']['isstraight'] = True
 
-
-            if bool(match('(h){5}',striaght_flush))==True or bool(match('(d){5}',striaght_flush))==True or bool(match('(c){5}',striaght_flush))==True or bool(match('(s){5}',striaght_flush))  == True: #match 5 executive (h|s|d|c) 
+            if bool(match('(h){5}', striaght_flush)) == True or bool(match('(d){5}', striaght_flush)) == True or bool(match('(c){5}', striaght_flush)) == True or bool(match('(s){5}', striaght_flush)) == True:  # match 5 executive (h|s|d|c)
                 suits_dict['straight']['isstraightflush'] = True
             Stright_flush = False
-            Flush = False 
+            Flush = False
             Straight = suits_dict['straight']['isstraight']
             Kind = ''
             if suits_dict['straight']['isstraightflush'] == True and suits_dict['straight']['isstraight'] == True:
@@ -238,7 +239,7 @@ class play_ground:
                 Kind = 'full house'
             elif '3' in Kind:
                 Kind = 'three of a kind'
-            elif Kind.count('2') >=2:
+            elif Kind.count('2') >= 2:
                 Kind = 'two pair'
             elif '2' in Kind:
                 Kind = 'pair'
@@ -251,7 +252,7 @@ class play_ground:
                 self.player_rank[player] = 'four of a kind'
             elif Kind == 'full house':
                 self.player_rank[player] = 'full house'
-            elif  Flush == True:
+            elif Flush == True:
                 self.player_rank[player] = 'flush'
             elif Straight == True:
                 self.player_rank[player] = 'straight'
@@ -264,8 +265,6 @@ class play_ground:
             elif Kind == 'high card':
                 self.player_rank[player] = 'high card'
 
-            
-        
         return self.player_rank
 
 
@@ -423,7 +422,9 @@ class Player(Dealer):
         elif money < Dealer.this_round_betsize * 2:
             print(
                 f'bet size must be at least 2 times larger than {Dealer.this_round_betsize}')
-#debugging lines
+
+
+# debugging lines
 table = play_ground(['mostafa', 'javad', 'ali'])
 table.preflop()
 table.flop()
@@ -431,11 +432,24 @@ table.turn()
 table.river()
 x = table.ranking(['mostafa', 'javad', 'ali'])
 
-print('mostafa: ',table.dict_players_cards['mostafa']+table.cards_table)
-print('javad: ',table.dict_players_cards['javad']+table.cards_table)
-print('ali: ',table.dict_players_cards['ali']+table.cards_table)
-print('--'*20)
-print(x)
-print('--'*20)
-print(table.player_data)
+# print('mostafa: ',table.dict_players_cards['mostafa']+table.cards_table)
+# print('javad: ',table.dict_players_cards['javad']+table.cards_table)
+# print('ali: ',table.dict_players_cards['ali']+table.cards_table)
+# print('--'*20)
+# print(x)
+# print('--'*20)
+# print(table.player_data)
 
+mostafa = Player('mostafa', 2000)
+javad = Player('javad', 3000)
+ali = Player('ali', 3000)
+
+# is_money_remained() method doesnt work correctly
+mostafa.bet(300, 'mostafa')
+javad.call('javad')
+ali.call('ali')
+mostafa.bet(500, 'mostafa')
+javad._raise(1000, 'javad')
+ali.call('ali')
+mostafa.bet(2000, 'mostafa')
+print(Dealer.players_money)

@@ -42,7 +42,6 @@ class play_ground:
         outputs --->
         list_cards:  list of 52 cards.
         '''
-        self.reset()
         list_suits = ['club', 'heart', 'spade', 'diamond']
         for suit in list_suits:
             for num in range(1, 14):
@@ -312,11 +311,12 @@ class play_ground:
 
 
 class Dealer(play_ground):
-    rounds = 0
-    bet_size = 0
+    rounds = 0  # number of rounds that played.
+    bet_size = 0  # the valid bet size for starting the new round.
+    # current status round betsize that will be chgange during raises.
     this_round_betsize = 0
-    pot_size = 0
-    players_money = {}
+    pot_size = 0  # total money on the table for the current round.
+    players_money = {}  # {player_name: current money}
 
     def __init__(Self, deafult_bet_size: int):
         """
@@ -334,6 +334,34 @@ class Dealer(play_ground):
         else:
             print(
                 f'bet size can"t be {deafult_bet_size}, choose a number greater than zero')
+
+    def big_blind(self):
+        """
+        calculation of begging big blind size. it will take average from entry money
+        and divide it by 15.
+        inputs--> 
+        none
+        outputs-->
+        none
+        """
+        if Dealer.rounds in [0, 1]:
+            total_value = 0
+            for value in Dealer.players_money.values():
+                total_value += value
+            big_blind = int(
+                total_value / (len(Dealer.players_money.keys()) * 15))
+            Dealer.bet_size = big_blind
+            Dealer.this_round_betsize = big_blind
+
+        return Dealer.bet_size
+
+    def start_round(self):
+        """
+        calling initia methodes that reset and update new values for starting the rnew round.
+        """
+        play_ground.reset(play_ground)
+        Dealer.reset_dealer(Dealer)
+        Dealer.big_blind(Dealer)
 
     def result(self, winner_name: str):
         """
@@ -375,6 +403,19 @@ class Dealer(play_ground):
             print(
                 f'The bet size will be increased after {5-(rounds%5)} rounds.')
         return Dealer.bet_size
+
+    def reset_dealer(self):
+        """
+        reset and update the values for the new rounds.
+
+        inputs -->
+        none
+
+        outputs -->
+        none
+        """
+        self.pot_size = 0
+        self.this_round_betsize = self.bet_size
 
 
 class Player(Dealer):
@@ -488,13 +529,19 @@ x, y = table.ranking(['mostafa', 'javad', 'ali'])
 mostafa = Player('mostafa', 2000)
 javad = Player('javad', 3000)
 ali = Player('ali', 3000)
+Dealer.start_round(Dealer)
+print('bet size: ', Dealer.bet_size)
 mostafa.bet(300, 'mostafa')
 javad.call('javad')
 ali.call('ali')
 mostafa.bet(500, 'mostafa')
 javad._raise(1000, 'javad')
+print('this round bet size: ', Dealer.this_round_betsize)
+print('bet size: ', Dealer.bet_size)
+
 ali.call('ali')
 mostafa.bet(1000, 'mostafa')
+print('pot_size: ', Dealer.pot_size)
 players_money = Dealer.result(Dealer, x)
 
 print(table.cards_table)
@@ -502,3 +549,4 @@ print(table.dict_players_cards)
 print(table.player_rank)
 print(Dealer.players_money)
 print('-'*15)
+print('round num: ', Dealer.rounds)

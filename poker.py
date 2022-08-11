@@ -12,7 +12,7 @@ class play_ground:
     dict_players_cards = {}  # list of players and their 2 cards in preflop
     player_data = {}  # dictionary of players that introduce based: key='player name' : value= f'player+{num}'
     # activated by __init__ method
-    # dictionary of players' ranking. key= 'name of player',value='ranking(ex.: flush)'
+    # dictionary of players' ranking. key= 'name of player',value='ranking-rankNum+cardsValue(ex.: flush-699899883)'
     player_rank = {}
     count = 0  # counting players in the table, activated by __init__ method
 
@@ -124,6 +124,7 @@ class play_ground:
         players: list, list of players
 
         outputs -->
+        self.winner(): str,winner name
         player_rank: dict, players' ranking
         """
         for player in players:
@@ -247,25 +248,67 @@ class play_ground:
                 Kind = 'high card'
 
             if striaght_flush == True:
-                self.player_rank[player] = 'straight flush'
+                self.player_rank[player] = 'straight flush-9'
             elif Kind == 'four of a kind':
-                self.player_rank[player] = 'four of a kind'
+                self.player_rank[player] = 'four of a kind-8'
             elif Kind == 'full house':
-                self.player_rank[player] = 'full house'
+                self.player_rank[player] = 'full house-7'
             elif Flush == True:
-                self.player_rank[player] = 'flush'
+                self.player_rank[player] = 'flush-6'
             elif Straight == True:
-                self.player_rank[player] = 'straight'
+                self.player_rank[player] = 'straight-5'
             elif Kind == 'three of a kind':
-                self.player_rank[player] = 'three of a kind'
+                self.player_rank[player] = 'three of a kind-4'
             elif Kind == 'two pair':
-                self.player_rank[player] = 'two pair'
+                self.player_rank[player] = 'two pair-3'
             elif Kind == 'pair':
-                self.player_rank[player] = 'a pair'
+                self.player_rank[player] = 'a pair-2'
             elif Kind == 'high card':
-                self.player_rank[player] = 'high card'
+                self.player_rank[player] = 'high card-1'
 
-        return self.player_rank
+            # cards' num for calculation of high card
+            num_players_cards = []
+            for card in player_cards:
+                num = int(card.split('-')[1])
+                if num == 13:  # 2 digit numbers will begin with 9
+                    num = 99
+                elif num == 12:
+                    num = 98
+                elif num == 11:
+                    num = 97
+                elif num == 10:
+                    num = 96
+                elif int(num) < 10:  # one digit numbers will begin with 8
+                    # first concatanate one digit numbers in str
+                    num = str(8)+str(num)
+                    num = int(num)  # convert str format to int
+                num_players_cards.append(int(num))
+            # sorting the list from top to down
+            num_players_cards.sort(reverse=True)
+            for num in num_players_cards:  # adding the number to players_rank dict
+                self.player_rank[player] += str(num)
+
+        # calling the winner function that returns the winner name
+        return self.winner(players=players), self.player_rank
+        # and player_rank dict
+
+    def winner(self, players: list):
+        """
+        determine the final winner
+
+        inputs -->
+        playres: list, list of players
+
+        output: -->
+        winner_name: str, name of the winner
+        """
+
+        ranking_list = []
+        for key, value in play_ground.player_rank.items():
+            ranking_list.append((value.split('-')[1], key))
+        ranking_list.sort(reverse=True)
+        winner_name = ranking_list[0][1]
+        return winner_name
 
 
 class Dealer(play_ground):
@@ -367,6 +410,7 @@ class Player(Dealer):
         if Dealer.players_money[player] - expense < 0:
             print(
                 f'Oops,you can not bet/raise {expense}, your remaining money is: {Dealer.players_money[player]}')
+            Dealer.players_money[player] += expense
 
     def bet(self, _bet, player):
         """
@@ -424,13 +468,14 @@ class Player(Dealer):
                 f'bet size must be at least 2 times larger than {Dealer.this_round_betsize}')
 
 
-# debugging lines
+########################################## debugging lines #####################################
 table = play_ground(['mostafa', 'javad', 'ali'])
 table.preflop()
 table.flop()
 table.turn()
 table.river()
-x = table.ranking(['mostafa', 'javad', 'ali'])
+x, y = table.ranking(['mostafa', 'javad', 'ali'])
+
 
 # print('mostafa: ',table.dict_players_cards['mostafa']+table.cards_table)
 # print('javad: ',table.dict_players_cards['javad']+table.cards_table)
@@ -443,13 +488,17 @@ x = table.ranking(['mostafa', 'javad', 'ali'])
 mostafa = Player('mostafa', 2000)
 javad = Player('javad', 3000)
 ali = Player('ali', 3000)
-
-# is_money_remained() method doesnt work correctly
 mostafa.bet(300, 'mostafa')
 javad.call('javad')
 ali.call('ali')
 mostafa.bet(500, 'mostafa')
 javad._raise(1000, 'javad')
 ali.call('ali')
-mostafa.bet(2000, 'mostafa')
+mostafa.bet(1000, 'mostafa')
+players_money = Dealer.result(Dealer, x)
+
+print(table.cards_table)
+print(table.dict_players_cards)
+print(table.player_rank)
 print(Dealer.players_money)
+print('-'*15)
